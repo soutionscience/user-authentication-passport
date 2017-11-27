@@ -4,6 +4,8 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var config = require('./config')
+var cors = require('cors')
 
 var passport =require('passport')
 var LocalStrategy= require('passport-local').Strategy
@@ -14,12 +16,16 @@ var mongoose = require('mongoose');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var movies = require('./routes/movies');
+var fav = require('./routes/favourite');
+
 
 var app = express();
-app.use(passport.initialize())
+app.use(cors())
 
 
-mongoose.connect('mongodb://localhost:27017/authTest', function(err, db){
+
+mongoose.connect(config.mongoDbUrl, function(err, db){
 	if(!err){
 		console.log('connected to mongo')
 		database= db;
@@ -40,11 +46,18 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// config passport
+var User= require('./models/user')
+app.use(passport.initialize())
+passport.use(new LocalStrategy(User.authenticate()))
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/users', users);
-
+app.use('/movies', movies);
+app.use('/favourites', fav);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
@@ -60,7 +73,10 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json({
+    message: err.message,
+    error: err
+  })
 });
 
 module.exports = app;
