@@ -5,7 +5,7 @@ var Verify = require('../verify')
 
 
 router.route('/')
-.get(controller.get)
+.get(Verify.verifyOrdinaryUser, controller.get)
 .post(Verify.verifyOrdinaryUser, controller.post)
 
 module.exports = router;

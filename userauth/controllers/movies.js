@@ -1,6 +1,27 @@
 var Movie= require('../models/movies');
 
 
+exports.params = function(req, res, next, id){ //take care if anything with params first
+ Movie.findById(id)
+ .populate('postedBy')
+
+    .then(function(movie) {
+      if (!movie) {
+        next(new Error('No movie with that id'));
+      } else {
+
+        req.movie = movie;
+        next();
+      }
+    }, function(err) {
+      next(err);
+    });
+};
+
+
+
+
+
 exports.get = function(req, res, next){
 
 	Movie.find({})
@@ -31,4 +52,30 @@ exports.post = function(req , res,  next){
 
 	})
 
+}
+
+
+exports.getOne = function(req, res, next){
+ 
+ var movie = req.movie;
+ 		 res.json(movie)
+
+
+
+}
+
+exports.postComment = function(req, res,next){
+	var movie = req.movie;
+	// var id = req.decoded._doc._id
+	// req.body.postedBy = id
+	movie.comments.push(req.body)
+	movie.save(function(err, comment){
+		if(err) throw err
+			res.status(200).json({status:"added new comment"})
+	})
+
+}
+
+exports.getComment= function(){
+	res.send("come and get me")
 }

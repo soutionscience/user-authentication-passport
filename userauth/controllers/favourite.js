@@ -15,28 +15,31 @@ exports.get = function(req, res, next){
 }
 
 exports.post = function(req, res, next){
-	var id = req.decoded._doc._id
-  Fav.find({'postedBy':id}, function(err, fav){
-  	if(err){
-  		console.log("not finding")
-  		newFav= new Fav( req.body)
-  		newFav.postedBy =id;
-  		newFav.save()
-  	}
-  	fav.dishes= req.body.id
-  	res.send("added new fav")
+	var id = req.decoded._doc._id;
+	Fav.findOne({ postedBy: id}, function(err, fav){
+		if(!fav){
 
-  })
+			req.body.postedBy = id;
+			fav= new Fav(req.body)
+			fav.save(function(err, favourite){
+				if(err) throw err;
+				res.json(favourite)
+			})
+			// res.send("fav does not exist put new one")
 
-	
-
-	// favourite = new Fav(req.body)
-	// favourite.postedBy = id; 
-	// favourite.save(function(err, fav){
-	// 	if(err){
-	// 		console.log(err)
-	// 	}
-	// 	res.status(200).json({status:"added new favourite"})
-	// })
+		}
+		else{
+			console.log("before push")
+			fav.movies.push(req.body.movies)
+			console.log("after push")
+			fav.save(function(err, favourite){
+				console.log("after save")
+				if (err) throw err
+					res.json(favourite)
+			})
+		}
+	})
+     
+     
 
 }

@@ -6,7 +6,7 @@ var Favorite = new Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'User'
 	},
-	dishes:[{
+	movies:[{
 		type:String
 	}]
 })
